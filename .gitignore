@@ -13,13 +13,12 @@ __pycache__/
 
 data/
 
-2D/output/
-
-2D/
-
-attractor_surface/
-
 1D/output/
+1D/__pycache__/
+test.ipynb
+test.py
+1D_beta/
+
 
 
 # C extensions
