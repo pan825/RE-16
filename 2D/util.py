@@ -55,3 +55,4 @@ def process_data(data):
     out = np.einsum('ai, ijt, jb -> abt', L, data, R, optimize=True)  # (16, 16, T) 
     return out
 
+

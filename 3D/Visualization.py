@@ -107,6 +107,7 @@ def animate_3d_volume(
                 yaxis=dict(range=[0, 16]),
                 zaxis=dict(range=[0, 16]),
                 camera=dict(eye=dict(x=1.5, y=1.5, z=1.5)),
+                aspectmode='data',
             ),
             width=width,
             height=height,
@@ -216,3 +217,59 @@ def animate_3d_volume(
 #     output_mp4="/home/pajucg/2D/animation.mp4",        # optional (needs ffmpeg)
 #     fps=10
 # )
+
+
+def plot_3d_volume(data: np.ndarray, time_index: int = 0, title: str = "3D Volume Visualization") -> None:
+    """Create an interactive 3D volume visualization using plotly."""
+    # Extract data at specific time point
+    volume_data = data[:, :, :, time_index]
+    
+    # Create coordinate grids
+    x, y, z = np.meshgrid(np.arange(data.shape[0]), 
+                          np.arange(data.shape[1]), 
+                          np.arange(data.shape[2]), indexing='ij')
+    
+    # Flatten arrays for scatter plot
+    x_flat = x.flatten()
+    y_flat = y.flatten()
+    z_flat = z.flatten()
+    values_flat = volume_data.flatten()
+    
+    # Filter to only plot data with value > 5
+    mask = values_flat > 0
+    x_filtered = x_flat[mask]
+    y_filtered = y_flat[mask]
+    z_filtered = z_flat[mask]
+    values_filtered = values_flat[mask]
+    
+    # Create 3D scatter plot with color mapping
+    fig = go.Figure(data=go.Scatter3d(
+        x=x_filtered,
+        y=y_filtered,
+        z=z_filtered,
+        mode='markers',
+        marker=dict(
+            size=3,
+            color=values_filtered,
+            colorscale='Blues',
+            opacity=0.8,
+            colorbar=dict(title="Value")
+        ),
+        text=[f'({x},{y},{z}): {val:.3f}' for x,y,z,val in zip(x_filtered, y_filtered, z_filtered, values_filtered)],
+        hovertemplate='<b>Position:</b> (%{x}, %{y}, %{z})<br><b>Value:</b> %{marker.color:.3f}<extra></extra>'
+    ))
+    
+    fig.update_layout(
+        title=f'{title} (t={time_index})',
+        scene=dict(
+            xaxis_title='X Index',
+            yaxis_title='Y Index',
+            zaxis_title='Z Index',
+            camera=dict(eye=dict(x=1.5, y=1.5, z=1.5)),
+            aspectmode='cube'
+        ),
+        width=800,
+        height=600
+    )
+    
+    fig.show()
