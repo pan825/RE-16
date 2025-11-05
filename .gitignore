@@ -1,7 +1,22 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
+# Project specific directories and files
+brian_standalone/
+brian_build/
+output/
+sweep_parameter/
+figures/
+data/
+1D/output/
+1D/__pycache__/
+1D_beta/
+
+# Project specific files
+* copy.py
+test.py
+test.ipynb
+calculate_distance_difference.py
+newplot.png
+
+# Data files
 *.dat
 *.csv
 *.json
@@ -11,16 +26,10 @@ __pycache__/
 *.pkl.gz
 *.pkl.bz2
 
-data/
-
-1D/output/
-1D/__pycache__/
-test.ipynb
-test.py
-1D_beta/
-newplot.png
-
-
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
 
 # C extensions
 *.so
@@ -88,6 +97,7 @@ instance/
 .scrapy
 
 # Sphinx documentation
+_docs/_build/
 docs/_build/
 
 # PyBuilder
@@ -95,7 +105,8 @@ docs/_build/
 target/
 
 # Jupyter Notebook
-.ipynb_checkpoints
+.ipynb_checkpoints/
+*.nbconvert.ipynb
 
 # IPython
 profile_default/
@@ -145,7 +156,6 @@ celerybeat.pid
 
 # SageMath parsed files
 *.sage.py
-
 # Environments
 .env
 .venv
@@ -154,6 +164,9 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+.conda/
+.conda_env/
+.python-version
 
 # Spyder project settings
 .spyderproject
@@ -165,26 +178,45 @@ venv.bak/
 # mkdocs documentation
 /site
 
-# mypy
+# Type checkers
 .mypy_cache/
 .dmypy.json
 dmypy.json
-
-# Pyre type checker
 .pyre/
-
-# pytype static type analyzer
 .pytype/
+
+# Linters
+.pylint.d/
 
 # Cython debug symbols
 cython_debug/
 
-# PyCharm
-#  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
-#  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore
-#  and can be added to the global gitignore or merged into this file.  For a more nuclear
-#  option (not recommended) you can uncomment the following to ignore the entire idea folder.
-#.idea/
+# Editors/IDEs
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Backup/swap files
+*~
+*.bak
+*.swp
+*.swo
+
+# Caches
+.cache/
+**/__pycache__/
 
 # Ruff stuff:
 .ruff_cache/
