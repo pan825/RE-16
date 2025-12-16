@@ -7,9 +7,12 @@
   "FB_matrix_W_top_10_matches_ncc.html",
   "FB_sorted_matrix_W.html",
   "FB_weight_matrix.html",
-  "matrix_W_top_10_matches_ncc.html",
   "PB_fig2_zoomed_patches.html",
   "PB_matrix_W_top_10_matches_ncc.html",
   "PB_sorted_matrix_W.html",
-  "PB_weight_matrix.html"
+  "PB_weight_matrix.html",
+  "LAL_fig2_zoomed_patches.html",
+  "LAL_matrix_W_top_10_matches_ncc.html",
+  "LAL_sorted_matrix_W.html",
+  "LAL_weight_matrix.html",
 ]
