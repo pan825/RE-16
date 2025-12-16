@@ -89,6 +89,54 @@
         return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
       }
 
+      // Attempt to infer GitHub repo info from GitHub Pages URL
+      function detectGitHubRepoInfo() {
+        const host = window.location.host || '';
+        const path = window.location.pathname || '/';
+        if (!host.endsWith('github.io')) return null;
+        const user = host.replace(/\.github\.io$/, '');
+        const segs = path.split('/').filter(Boolean);
+        // Project Pages: https://user.github.io/repo/...
+        if (segs.length >= 1) {
+          const repo = segs[0];
+          return { user, repo, isUserSite: false };
+        }
+        // User/Org Pages: https://user.github.io/ (served from user.github.io repo)
+        return { user, repo: `${user}.github.io`, isUserSite: true };
+      }
+
+      // List files via GitHub REST API if on GitHub Pages
+      async function loadPagesFromGitHub() {
+        const info = detectGitHubRepoInfo();
+        if (!info) return null;
+        const repo = info.repo;
+        const user = info.user;
+        // Try common branches in order
+        const branches = ['main', 'master', 'gh-pages'];
+        // When publishing from /docs on default branch, files live under /docs in repo.
+        // When using gh-pages branch (project pages), files often live at repo root.
+        const candidatePaths = ['docs', ''];
+        for (const branch of branches) {
+          for (const sub of candidatePaths) {
+            const apiUrl = `https://api.github.com/repos/${encodeURIComponent(user)}/${encodeURIComponent(repo)}/contents/${sub}?ref=${encodeURIComponent(branch)}`;
+            try {
+              const res = await fetch(apiUrl, { headers: { 'Accept': 'application/vnd.github+json' } });
+              if (!res.ok) continue;
+              const items = await res.json();
+              if (!Array.isArray(items)) continue;
+              const names = items
+                .filter(it => it && it.type === 'file' && typeof it.name === 'string' && it.name.endsWith('.html') && it.name !== 'index.html')
+                .map(it => it.name)
+                .sort(naturalSort);
+              if (names.length) return names;
+            } catch (e) {
+              // ignore and try next
+            }
+          }
+        }
+        return null;
+      }
+
       async function loadPagesFromManifest() {
         try {
           const res = await fetch('pages.json', { cache: 'no-cache' });
@@ -156,7 +204,8 @@
 
       async function refreshList() {
         const current = selectEl.value;
-        allPages = await loadPagesFromManifest();
+        // Prefer GitHub API when available
+        allPages = (await loadPagesFromGitHub()) || (await loadPagesFromManifest());
         const params = new URLSearchParams(window.location.search);
         const paramPage = params.get('page');
         if (paramPage && paramPage.endsWith('.html') && paramPage !== 'index.html' && !allPages.includes(paramPage)) {
@@ -179,7 +228,7 @@
       }
 
       // Initial load
-      allPages = await loadPagesFromManifest();
+      allPages = (await loadPagesFromGitHub()) || (await loadPagesFromManifest());
       const params = new URLSearchParams(window.location.search);
       const initial = params.get('page');
       if (initial && initial.endsWith('.html') && initial !== 'index.html' && !allPages.includes(initial)) {
