@@ -1,4 +1,5 @@
 from brian2 import *
+import brian2 as b2
 from equations import *
 from connections import build_pen_to_epg_indices, build_pen_to_epg_array
 import matplotlib.pyplot as plt
@@ -64,27 +65,29 @@ def simulator(
         w_EP = 0.012, # EB -> PEN 
         w_PE = 0.709, # PEN -> EB
         sigma = 0.0001, # noise level
+        
+        defaultclock_dt = 0.1*ms,
         events = None,
+        seed = 830,
+
 ):
     """Simulate the head direction network with visual cues and body rotation."""
-    start_scope()  
     
-    taum   = 20*ms   # time constant
-    Cm     = 0.1
-    g_L    = 10   # leak conductance
+    if isinstance(seed, str) and seed.lower() == 'random':
+        b2.seed(np.random.randint(0, 1000000))
+    elif isinstance(seed, int):
+        b2.seed(seed)
+    elif seed is None:
+        b2.seed(830)
+    else:
+        raise ValueError(f'Invalid seed: {seed}')
+    if hasattr(defaultclock_dt, 'dim'):
+        defaultclock.dt = defaultclock_dt
+    else:
+        defaultclock.dt = defaultclock_dt * ms
+    start_scope()  
+
     E_l    = -0.07  # leak reversal potential (volt)
-    E_e    = 0   # excitatory reversal potential
-    tau_e  = 5*ms    # excitatory synaptic time constant
-    Vr     = E_l     # reset potential
-    Vth    = -0.05  # spike threshold (volt)
-    Vs     = 0.02   # spiking potential (volt)
-    w_e    = 0.1  	 # excitatory synaptic weight (units of g_L)
-    v_e    = 5*Hz    # excitatory Poisson rate
-    N_e         = 100     # number of excitatory inputs
-    E_ach       = 0
-    tau_ach     = 10*ms
-    E_GABAA     = -0.07 # GABAA reversal potential
-    tau_GABAA   = 5*ms # GABAA synaptic time constant
 
     # create neuron
     EPG = NeuronGroup(48, model=eqs_EPG, threshold='v>Vth', reset='v=Vr', refractory='1*ms', method='euler' )
@@ -152,14 +155,17 @@ def simulator(
     ## SIMULATION ###
 
     def visual_cues_on(location, strength):
-        location %= 2*np.pi
-        theta_r = location/2
-        theta_l = theta_r + np.pi
-        visual_cues = visual_cue_vectorized(theta_r, theta_l, strength)
+        # location %= 2*np.pi
+        # theta_r = location/2
+        # theta_l = theta_r + np.pi
+        # visual_cues = visual_cue_vectorized(theta_r, theta_l, strength)
         
-        # Apply visual cues to all EPG groups at once
-        for i, cue in enumerate(visual_cues):
-            EPG_groups[i].I = cue
+        # # Apply visual cues to all EPG groups at once
+        # for i, cue in enumerate(visual_cues):
+        #     EPG_groups[i].I = cue
+        EPG_groups[location].I = strength
+
+
 
     def visual_cues_off():
         EPG.I = 0
@@ -172,6 +178,9 @@ def simulator(
         PEN.I = 0
         for i in range(8,16):
             PEN_groups[i].I = strength
+
+    def reset():
+        PEN.I = 0
 
     # Event-driven stimulation sequence 
     if events is None:
@@ -200,7 +209,7 @@ def simulator(
             elif direction == 'left':
                 left(strength)
         elif etype == 'wait' or etype == 'run':
-            pass
+            reset()
         else:
             raise ValueError(f'Unknown event type: {etype}')
 

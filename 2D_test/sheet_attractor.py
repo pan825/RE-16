@@ -26,14 +26,10 @@ def simulator(
         seed=830,
 ):
     """Simulate the head direction network with visual cues and body rotation."""
-    if isinstance(seed, str) and seed.lower() == 'random':
+    if seed is None:
         b2.seed(np.random.randint(0, 1000000))
-    elif isinstance(seed, int):
-        b2.seed(seed)
-    elif seed is None:
-        b2.seed(830)
     else:
-        raise ValueError(f'Invalid seed: {seed}')
+        b2.seed(seed)
     start = time.time()
     if hasattr(defaultclock_dt, 'dim'):
         defaultclock.dt = defaultclock_dt
@@ -45,19 +41,19 @@ def simulator(
     
     # create neuron
     EPG = NeuronGroup(256*3, model=eqs_EPG, threshold='v>Vth', reset='v=Vr', refractory='1*ms', method='euler')
-    PENx = NeuronGroup(256*3,model=eqs_PENx, threshold='v>Vth', reset='v=Vr', refractory='1*ms', method='euler')
+    # PENx = NeuronGroup(256*3,model=eqs_PENx, threshold='v>Vth', reset='v=Vr', refractory='1*ms', method='euler')
     PENy = NeuronGroup(256*3,model=eqs_PENy, threshold='v>Vth', reset='v=Vr', refractory='1*ms', method='euler')
     R = NeuronGroup(3,model=eqs_R, threshold='v>Vth', reset='v=Vr', refractory='1*ms', method='euler')
 
     # initialize neuron
     EPG.v = E_l
-    PENx.v = E_l
+    # PENx.v = E_l
     PENy.v = E_l
     R.v = E_l
 
     # EPG_groups = [EPG[i:i+3] for i in range(0, 256*3, 3)]
     EPG_groups = [[EPG[i*48 + j*3:i*48 + j*3 + 3] for j in range(16)] for i in range(16)]
-    PENx_groups = [[PENx[i*48 + j*3:i*48 + j*3 + 3] for j in range(16)] for i in range(16)]
+    # PENx_groups = [[PENx[i*48 + j*3:i*48 + j*3 + 3] for j in range(16)] for i in range(16)]
     PENy_groups = [[PENy[i*48 + j*3:i*48 + j*3 + 3] for j in range(16)] for i in range(16)]
 
     # ========= EPG -> EPG =========
@@ -68,8 +64,8 @@ def simulator(
 
     # ========= PEN -> PEN =========
     # print(f'{time.strftime("%H:%M:%S")} [info] Building PEN -> PEN connections')
-    S_PPx = Synapses(PENx, PENx, Ach_eqs_PPx, on_pre='s_ach += w_PP', method='euler')
-    S_PPx.connect(condition='i//3 == j//3 and i != j')
+    # S_PPx = Synapses(PENx, PENx, Ach_eqs_PPx, on_pre='s_ach += w_PP', method='euler')
+    # S_PPx.connect(condition='i//3 == j//3 and i != j')
     S_PPy = Synapses(PENy, PENy, Ach_eqs_PPy, on_pre='s_ach += w_PP', method='euler')
     S_PPy.connect(condition='i//3 == j//3 and i != j')
     
@@ -90,24 +86,24 @@ def simulator(
     
     # ========= EPG -> PEN =========
     # print(f'{time.strftime("%H:%M:%S")} [info] Building EPG -> PEN connections')
-    S_EPx = Synapses(EPG, PENx, Ach_eqs_EPx, on_pre='s_ach += w_EP', method='euler')
-    S_EPx.connect(condition='i//3 == j//3')
+    # S_EPx = Synapses(EPG, PENx, Ach_eqs_EPx, on_pre='s_ach += w_EP', method='euler')
+    # S_EPx.connect(condition='i//3 == j//3')
     S_EPy = Synapses(EPG, PENy, Ach_eqs_EPy, on_pre='s_ach += w_EP', method='euler')
     S_EPy.connect(condition='i//3 == j//3')
 
     # ========= PEN -> EPG (optimized by connectivity matrix) =========
     # print(f'{time.strftime("%H:%M:%S")} [info] Building PEN -> EPG connections')
-    S_PxE_2 = Synapses(PENx, EPG, model=Ach_eqs_PxE_2, on_pre='s_ach += 2*w_PE', method='euler')
-    S_PxE_1 = Synapses(PENx, EPG, model=Ach_eqs_PxE_1, on_pre='s_ach += 1*w_PE', method='euler')
+    # S_PxE_2 = Synapses(PENx, EPG, model=Ach_eqs_PxE_2, on_pre='s_ach += 2*w_PE', method='euler')
+    # S_PxE_1 = Synapses(PENx, EPG, model=Ach_eqs_PxE_1, on_pre='s_ach += 1*w_PE', method='euler')
     S_PyE_2 = Synapses(PENy, EPG, model=Ach_eqs_PyE_2, on_pre='s_ach += 2*w_PE', method='euler')
     S_PyE_1 = Synapses(PENy, EPG, model=Ach_eqs_PyE_1, on_pre='s_ach += 1*w_PE', method='euler')
 
     pre2, post2, pre1, post1 = build_pen_to_epg_array()
 
     # # ---- build all connections at once ----
-    for k in range(16):
-        S_PxE_2.connect(i=pre2+k*48, j=post2+k*48)
-        S_PxE_1.connect(i=pre1+k*48, j=post1+k*48)
+    for k in range(1):
+        # S_PxE_2.connect(i=pre2+k*48, j=post2+k*48)
+        # S_PxE_1.connect(i=pre1+k*48, j=post1+k*48)
         S_PyE_2.connect(i=map_index(pre2)+k*3, j=map_index(post2)+k*3)
         S_PyE_1.connect(i=map_index(pre1)+k*3, j=map_index(post1)+k*3)
     
@@ -116,36 +112,72 @@ def simulator(
         # S_PyE_2.connect(i=map_index(pre2)+k*3, j=(map_index(post2)+24+k*3)%768)
         # S_PyE_1.connect(i=map_index(pre1)+k*3, j=(map_index(post1)+24+k*3)%768)
 
+    def visualise_connectivity(S_list, weights, title=""):
+        # Combine all synapses into one visualization
+        if not isinstance(S_list, list):
+            S_list = [S_list]
+            weights = [1]
+        
+        Ns = len(S_list[0].source)
+        Nt = len(S_list[0].target)
+        
+        plt.figure(figsize=(12, 12))
+        
+        # Create connectivity matrix with weights
+        conn_matrix = zeros((Nt, Ns))
+        for S, weight in zip(S_list, weights):
+            for i, j in zip(S.i, S.j):
+                conn_matrix[j, i] += weight
+        
+        plt.imshow(conn_matrix, aspect='auto', cmap='viridis', origin='lower')
+        
+        # Add grid lines to split matrix per 48 neurons
+        for i in range(48, Ns, 48):
+            plt.axvline(x=i-0.5, color='white', linewidth=1, alpha=0.7)
+        for i in range(48, Nt, 48):
+            plt.axhline(y=i-0.5, color='white', linewidth=1, alpha=0.7)
+        
+        plt.xlabel('Source neuron index')
+        plt.ylabel('Target neuron index')
+        plt.title('Connectivity Matrix')
+        plt.colorbar(label='Connection Weight')
+        plt.title(title)
+        plt.tight_layout()
+        plt.savefig(f'figures/{title}.png')
 
+    # Visualize combined synapse types
+    # visualise_connectivity([S_PxE_2, S_PxE_1], [2, 1], "PENx_EPG")
+    # visualise_connectivity([S_PyE_2, S_PyE_1], [2, 1], "PENy_EPG")
     # ========= end PEN -> EPG =========
 
     # record model state
     PRM_EPG = [PopulationRateMonitor(EPG_groups[i][j]) for i in range(16) for j in range(16)]
-    PRM_PENx = [PopulationRateMonitor(PENx_groups[i][j]) for i in range(16) for j in range(16)]
+    # PRM_PENx = [PopulationRateMonitor(PENx_groups[i][j]) for i in range(16) for j in range(16)]
     PRM_PENy = [PopulationRateMonitor(PENy_groups[i][j]) for i in range(16) for j in range(16)]
 
     net = Network(collect())
-    net.add(S_EPx,S_EPy,S_EE,S_PPx,S_PPy,S_EI,S_IE,S_II,S_PxE_2,S_PxE_1,S_PyE_2,S_PyE_1)
+    net.add(S_EPy,S_EE,S_PPy,S_EI,S_IE,S_II,S_PyE_2,S_PyE_1)
     net.add(*PRM_EPG)
-    net.add(*PRM_PENx)
+    # net.add(*PRM_PENx)
     net.add(*PRM_PENy)
     
     def reset():
-        PENx.I = 0
+        # PENx.I = 0
         PENy.I = 0
         # R.I = 0
 
     def right(strength=0.015):
         reset()
-        for i in range(16):
-            for j in range(8):
-                PENx_groups[i][j].I = strength
-
+        # for i in range(16):
+        #     for j in range(8):
+        #         PENx_groups[i][j].I = strength
+                
+                
     def left(strength):
         reset()
-        for i in range(16):
-            for j in range(8, 16):
-                PENx_groups[i][j].I = strength
+        # for i in range(16):
+        #     for j in range(8, 16):
+        #         # PENx_groups[i][j].I = strength
 
     def up(strength):
         reset()
@@ -218,15 +250,15 @@ def simulator(
     print(f'\r{time.strftime("%H:%M:%S")} : {(end - start)//60:.0f} min {(end - start)%60:.1f} sec -> simulation end', flush=True)
     smooth_width = 5*ms
     fr_epg = np.array([prm.smooth_rate(width=smooth_width) for prm in PRM_EPG])
-    fr_penx = np.array([prm.smooth_rate(width=smooth_width) for prm in PRM_PENx])
+    # fr_penx = np.array([prm.smooth_rate(width=smooth_width) for prm in PRM_PENx])
     fr_peny = np.array([prm.smooth_rate(width=smooth_width) for prm in PRM_PENy])
     # time vector from monitors (in ms)
     t = np.asarray(PRM_EPG[0].t/ms)
     time_length = fr_epg.shape[1]
     fr = fr_epg.reshape(16, 16, time_length)
-    fr_penx = fr_penx.reshape(16, 16, time_length)
+    # fr_penx = fr_penx.reshape(16, 16, time_length)
     fr_peny = fr_peny.reshape(16, 16, time_length)
-    return t, fr, fr_penx, fr_peny
+    return t, fr, fr_peny
 
 if __name__ == '__main__':
     from util import process_data

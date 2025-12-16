@@ -61,42 +61,35 @@ def simulator(
     PENy_groups = [[PENy[i*48 + j*3:i*48 + j*3 + 3] for j in range(16)] for i in range(16)]
 
     # ========= EPG -> EPG =========
-    # print(f'{time.strftime("%H:%M:%S")} [info] Building EPG -> EPG connections')
 
     S_EE = Synapses(EPG, EPG, Ach_eqs_EE, on_pre='s_ach += w_EE', method='euler')
     S_EE.connect(condition='i//3 == j//3 and i != j')
 
     # ========= PEN -> PEN =========
-    # print(f'{time.strftime("%H:%M:%S")} [info] Building PEN -> PEN connections')
     S_PPx = Synapses(PENx, PENx, Ach_eqs_PPx, on_pre='s_ach += w_PP', method='euler')
     S_PPx.connect(condition='i//3 == j//3 and i != j')
     S_PPy = Synapses(PENy, PENy, Ach_eqs_PPy, on_pre='s_ach += w_PP', method='euler')
     S_PPy.connect(condition='i//3 == j//3 and i != j')
     
     # ========= EPG -> R =========
-    # print(f'{time.strftime("%H:%M:%S")} [info] Building EPG -> R connections')
     S_EI = Synapses(EPG, R, model=Ach_eqs_EI, on_pre='s_ach += w_EI', method='euler')
     S_EI.connect(condition='True')
     
     # ========= R   -> EPG =========
-    # print(f'{time.strftime("%H:%M:%S")} [info] Building R -> EPG connections')
     S_IE = Synapses(R, EPG, model=GABA_eqs, on_pre='s_GABAA += w_IE', method='euler')
     S_IE.connect(condition='True')
     
     # ========= R <-> R =========
-    # print(f'{time.strftime("%H:%M:%S")} [info] Building R <-> R connections')
     S_II = Synapses(R, R, model=GABA_eqs_i, on_pre='s_GABAA += w_II', method='euler')
     S_II.connect(condition='i != j')
     
     # ========= EPG -> PEN =========
-    # print(f'{time.strftime("%H:%M:%S")} [info] Building EPG -> PEN connections')
     S_EPx = Synapses(EPG, PENx, Ach_eqs_EPx, on_pre='s_ach += w_EP', method='euler')
     S_EPx.connect(condition='i//3 == j//3')
     S_EPy = Synapses(EPG, PENy, Ach_eqs_EPy, on_pre='s_ach += w_EP', method='euler')
     S_EPy.connect(condition='i//3 == j//3')
 
     # ========= PEN -> EPG (optimized by connectivity matrix) =========
-    # print(f'{time.strftime("%H:%M:%S")} [info] Building PEN -> EPG connections')
     S_PxE_2 = Synapses(PENx, EPG, model=Ach_eqs_PxE_2, on_pre='s_ach += 2*w_PE', method='euler')
     S_PxE_1 = Synapses(PENx, EPG, model=Ach_eqs_PxE_1, on_pre='s_ach += 1*w_PE', method='euler')
     S_PyE_2 = Synapses(PENy, EPG, model=Ach_eqs_PyE_2, on_pre='s_ach += 2*w_PE', method='euler')
@@ -110,12 +103,11 @@ def simulator(
         S_PxE_1.connect(i=pre1+k*48, j=post1+k*48)
         S_PyE_2.connect(i=map_index(pre2)+k*3, j=map_index(post2)+k*3)
         S_PyE_1.connect(i=map_index(pre1)+k*3, j=map_index(post1)+k*3)
-    
-        # S_PxE_2.connect(i=pre2+k*48, j=(post2+8*16*3+k*48)%768)
-        # S_PxE_1.connect(i=pre1+k*48, j=(post1+8*16*3+k*48)%768)
-        # S_PyE_2.connect(i=map_index(pre2)+k*3, j=(map_index(post2)+24+k*3)%768)
-        # S_PyE_1.connect(i=map_index(pre1)+k*3, j=(map_index(post1)+24+k*3)%768)
 
+        S_PxE_2.connect(i=pre2+k*48, j=(post2+8*16*3+k*48)%768)
+        S_PxE_1.connect(i=pre1+k*48, j=(post1+8*16*3+k*48)%768)
+        S_PyE_2.connect(i=map_index(pre2)+k*3, j=(map_index(post2)+24+k*3)%768)
+        S_PyE_1.connect(i=map_index(pre1)+k*3, j=(map_index(post1)+24+k*3)%768)
 
     # ========= end PEN -> EPG =========
 
@@ -161,9 +153,9 @@ def simulator(
 
     def visual_cue_on(x, y, strength=0.05):
         EPG_groups[x][y].I = strength
-        EPG_groups[x][y+8].I = strength
-        EPG_groups[x+8][y].I = strength
-        EPG_groups[x+8][y+8].I = strength
+        # EPG_groups[x][y+8].I = strength
+        # EPG_groups[x+8][y].I = strength
+        # EPG_groups[x+8][y+8].I = strength
         
     def visual_cue_off():
         EPG.I = 0

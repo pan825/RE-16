@@ -65,11 +65,13 @@
   </main>
 
   <script>
-    (function () {
+    (async function () {
       const selectEl = document.getElementById('fileSelect');
       const iframeEl = document.getElementById('viewer');
       const noteEl = document.querySelector('.note');
-      const pages = [
+      // Hardcoded fallback in case pages.json is unavailable (e.g., opened via file://)
+      const fallbackPages = [
+        'EB_weight_matrix.html',
         'EB_fig2_zoomed_patches.html',
         'EB_matrix_W_top_10_matches_ncc.html',
         'EB_sorted_matrix_W.html',
@@ -77,6 +79,25 @@
         'PB_sorted_matrix_W.html',
         'matrix_W_top_10_matches_ncc.html'
       ];
+
+      async function loadPagesFromManifest() {
+        try {
+          const res = await fetch('pages.json', { cache: 'no-cache' });
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          const arr = await res.json();
+          if (!Array.isArray(arr)) throw new Error('Invalid manifest');
+          const filtered = arr
+            .filter(name => typeof name === 'string' && name.endsWith('.html') && name !== 'index.html');
+          // Natural-ish sort
+          filtered.sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
+          return filtered.length ? filtered : fallbackPages;
+        } catch (err) {
+          console.warn('Could not load pages.json:', err);
+          return fallbackPages;
+        }
+      }
+
+      const pages = await loadPagesFromManifest();
 
       // Populate selector
       for (const name of pages) {

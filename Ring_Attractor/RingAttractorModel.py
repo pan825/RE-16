@@ -428,9 +428,9 @@ class Simulator:
                 if show_velocity and not np.isnan(ev['angular_velocity']):
                     mid =  (start_time + end_time) / 2
                     if ev['event_type'] == 'shift':
-                        txt = f"{ev['event_type']}\n{ev['angular_velocity_deg']:.1f}°/s\nStrength: {ev.get('strength', 'N/A')}"
+                        txt = f"{ev['event_type']}\n{ev['angular_velocity']:.1f} rad/s\nStrength: {ev.get('strength', 'N/A')}"
                     else:
-                        txt = f"{ev['event_type']}\n{ev['angular_velocity_deg']:.1f}°/s"
+                        txt = f"{ev['event_type']}\n{ev['angular_velocity']:.1f} rad/s"
                     y_top = ax1.get_ylim()[1] * 0.9
                     ax1.annotate(txt, (mid, y_top), ha='center', va='top', fontsize=9,
                                 bbox=dict(boxstyle='round,pad=0.3', facecolor='yellow', alpha=0.7))

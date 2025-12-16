@@ -1,3 +1,23 @@
+from brian2 import ms, Hz
+
+taum   = 20*ms   # time constant
+Cm     = 0.1     # membrane capacitance
+g_L    = 10   # leak conductance
+E_e    = 0   # excitatory reversal potential
+tau_e  = 5*ms    # excitatory synaptic time constant
+E_l    = -0.07  # leak reversal potential (volt)
+Vr     = E_l     # reset potential
+Vth    = -0.05  # spike threshold (volt)
+Vs     = 0.02   # spiking potential (volt)
+w_e    = 0.1  	 # excitatory synaptic weight (units of g_L)
+v_e    = 5*Hz    # excitatory Poisson rate
+N_e         = 100     # number of excitatory inputs
+E_ach       = 0
+tau_ach     = 10*ms
+E_GABAA     = -0.07 # GABAA reversal potential
+tau_GABAA   = 5*ms # GABAA synaptic time constant
+
+
 # model equations
 eqs_EPG = '''
 dv/dt = ( Isyn + Isyn_i +Isyn_PE + I + E_l - v) / taum + sigma*sqrt(2/taum)*xi: 1 (unless refractory)

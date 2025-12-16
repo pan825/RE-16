@@ -25,7 +25,15 @@ newplot.png
 *.pth
 *.pkl.gz
 *.pkl.bz2
-
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+*.tiff
+*.ico
+*.webp
+*.svg
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
