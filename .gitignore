@@ -19,7 +19,6 @@ newplot.png
 # Data files
 *.dat
 *.csv
-*.json
 *.pkl
 *.pt
 *.pth
