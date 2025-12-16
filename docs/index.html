@@ -56,14 +56,16 @@
     <div class="spacer"></div>
     <label for="fileSelect">Choose file:</label>
     <select id="fileSelect" aria-label="Choose HTML file to view">
-      <option value="sorted_matrix_W.html">sorted_matrix_W.html</option>
-      <option value="fig2_zoomed_patches.html">fig2_zoomed_patches.html</option>
+      <option value="EB_sorted_matrix_W.html">EB_sorted_matrix_W.html</option>
+      <option value="EB_fig2_zoomed_patches.html">EB_fig2_zoomed_patches.html</option>
+      <option value="EB_matrix_matches.html">EB_matrix_matches.html</option>
+      <option value="EB_matrix_W_top_10_matches_ncc.html">EB_matrix_W_top_10_matches_ncc.html</option>
     </select>
     <div class="spacer"></div>
-    <span class="note">Tip: share links like ?page=fig2_zoomed_patches.html</span>
+    <span class="note">Tip: share links like ?page=EB_sorted_matrix_W.html</span>
   </header>
   <main>
-    <iframe id="viewer" src="sorted_matrix_W.html" title="HTML preview"></iframe>
+    <iframe id="viewer" src="EB_sorted_matrix_W.html" title="HTML preview"></iframe>
   </main>
 
   <script>
@@ -73,7 +75,12 @@
 
       function setPage(page) {
         if (!page) return;
-        const allowed = new Set(['sorted_matrix_W.html', 'fig2_zoomed_patches.html']);
+        const allowed = new Set([
+          'EB_sorted_matrix_W.html',
+          'EB_fig2_zoomed_patches.html',
+          'EB_matrix_matches.html',
+          'EB_matrix_W_top_10_matches_ncc.html'
+        ]);
         if (!allowed.has(page)) return;
         selectEl.value = page;
         iframeEl.src = page;
