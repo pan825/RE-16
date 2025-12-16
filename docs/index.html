@@ -56,32 +56,39 @@
     <div class="spacer"></div>
     <label for="fileSelect">Choose file:</label>
     <select id="fileSelect" aria-label="Choose HTML file to view">
-      <option value="EB_sorted_matrix_W.html">EB_sorted_matrix_W.html</option>
-      <option value="EB_fig2_zoomed_patches.html">EB_fig2_zoomed_patches.html</option>
-      <option value="EB_matrix_matches.html">EB_matrix_matches.html</option>
-      <option value="EB_matrix_W_top_10_matches_ncc.html">EB_matrix_W_top_10_matches_ncc.html</option>
     </select>
     <div class="spacer"></div>
-    <span class="note">Tip: share links like ?page=EB_sorted_matrix_W.html</span>
+    <span class="note">Tip: share links like ?page=...</span>
   </header>
   <main>
-    <iframe id="viewer" src="EB_sorted_matrix_W.html" title="HTML preview"></iframe>
+    <iframe id="viewer" src="" title="HTML preview"></iframe>
   </main>
 
   <script>
     (function () {
       const selectEl = document.getElementById('fileSelect');
       const iframeEl = document.getElementById('viewer');
+      const noteEl = document.querySelector('.note');
+      const pages = [
+        'EB_fig2_zoomed_patches.html',
+        'EB_matrix_W_top_10_matches_ncc.html',
+        'EB_sorted_matrix_W.html',
+        'PB_matrix_W_top_10_matches_ncc.html',
+        'PB_sorted_matrix_W.html',
+        'matrix_W_top_10_matches_ncc.html'
+      ];
+
+      // Populate selector
+      for (const name of pages) {
+        const opt = document.createElement('option');
+        opt.value = name;
+        opt.textContent = name;
+        selectEl.appendChild(opt);
+      }
 
       function setPage(page) {
         if (!page) return;
-        const allowed = new Set([
-          'EB_sorted_matrix_W.html',
-          'EB_fig2_zoomed_patches.html',
-          'EB_matrix_matches.html',
-          'EB_matrix_W_top_10_matches_ncc.html'
-        ]);
-        if (!allowed.has(page)) return;
+        if (!pages.includes(page)) return;
         selectEl.value = page;
         iframeEl.src = page;
         const url = new URL(window.location.href);
@@ -95,8 +102,10 @@
 
       const params = new URLSearchParams(window.location.search);
       const initial = params.get('page');
-      if (initial) {
-        setPage(initial);
+      const first = pages[0];
+      setPage(initial && pages.includes(initial) ? initial : first);
+      if (noteEl && first) {
+        noteEl.textContent = 'Tip: share links like ?page=' + first;
       }
     })();
   </script>
