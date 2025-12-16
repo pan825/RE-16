@@ -26,7 +26,7 @@ def simulator(
         seed=830,
 ):
     """Simulate the head direction network with visual cues and body rotation."""
-
+    b2.seed(seed)
     start = time.time()
     if hasattr(defaultclock_dt, 'dim'):
         defaultclock.dt = defaultclock_dt
@@ -35,12 +35,12 @@ def simulator(
     start_scope()  
     
     E_l    = -0.07  # leak reversal potential (volt)
+    
     # create neuron
     EPG = NeuronGroup(256*3, model=eqs_EPG, threshold='v>Vth', reset='v=Vr', refractory='1*ms', method='euler')
     PENx = NeuronGroup(256*3,model=eqs_PENx, threshold='v>Vth', reset='v=Vr', refractory='1*ms', method='euler')
     PENy = NeuronGroup(256*3,model=eqs_PENy, threshold='v>Vth', reset='v=Vr', refractory='1*ms', method='euler')
     R = NeuronGroup(3,model=eqs_R, threshold='v>Vth', reset='v=Vr', refractory='1*ms', method='euler')
-    b2.seed(seed)
 
     # initialize neuron
     EPG.v = E_l
@@ -121,6 +121,7 @@ def simulator(
     def reset():
         PENx.I = 0
         PENy.I = 0
+        R.I = 0
 
     def right(strength=0.015):
         reset()
