@@ -2,12 +2,63 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>My Site</title>
+    <title>Sorted Matrix W</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <style>body{font-family:system-ui, Arial; margin:40px}</style>
+    <style>
+      html, body { height: 100%; }
+      body { margin: 0; font-family: system-ui, Arial, sans-serif; background: #fff; color: #111; }
+      header {
+        box-sizing: border-box;
+        padding: 12px 16px;
+        border-bottom: 1px solid #e5e7eb;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      header h1 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 600;
+      }
+      header a {
+        color: #2563eb;
+        text-decoration: none;
+      }
+      header a:hover { text-decoration: underline; }
+      .viewer {
+        width: 100%;
+        height: calc(100vh - 54px);
+        border: 0;
+        display: block;
+      }
+      .notice {
+        padding: 16px;
+        font-size: 14px;
+        color: #6b7280;
+      }
+      @media (max-width: 480px) {
+        header h1 { font-size: 14px; }
+      }
+    </style>
   </head>
   <body>
-    <h1>Hello, GitHub Pages!</h1>
-    <p>Deployed from GitHub.</p>
+    <header>
+      <h1>Sorted Matrix W</h1>
+      <a href="results/sorted_matrix_W.html" target="_blank" rel="noopener">Open in new tab</a>
+    </header>
+    <iframe
+      class="viewer"
+      src="results/sorted_matrix_W.html"
+      title="sorted_matrix_W"
+    >
+    </iframe>
+    <noscript>
+      <div class="notice">
+        JavaScript is disabled. If the embedded page does not load, open it directly:
+        <a href="results/sorted_matrix_W.html">results/sorted_matrix_W.html</a>
+      </div>
+    </noscript>
   </body>
-</html>
+  </html>
+
