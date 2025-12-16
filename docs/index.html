@@ -57,6 +57,8 @@
     <label for="fileSelect">Choose file:</label>
     <select id="fileSelect" aria-label="Choose HTML file to view">
     </select>
+    <input id="filterInput" type="search" placeholder="Filter files..." aria-label="Filter files">
+    <button id="refreshBtn" type="button" aria-label="Refresh file list">Refresh</button>
     <div class="spacer"></div>
     <span class="note">Tip: share links like ?page=...</span>
   </header>
@@ -69,6 +71,9 @@
       const selectEl = document.getElementById('fileSelect');
       const iframeEl = document.getElementById('viewer');
       const noteEl = document.querySelector('.note');
+      const filterEl = document.getElementById('filterInput');
+      const refreshBtn = document.getElementById('refreshBtn');
+      let allPages = [];
       // Hardcoded fallback in case pages.json is unavailable (e.g., opened via file://)
       const fallbackPages = [
         'EB_weight_matrix.html',
@@ -80,6 +85,10 @@
         'matrix_W_top_10_matches_ncc.html'
       ];
 
+      function naturalSort(a, b) {
+        return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
+      }
+
       async function loadPagesFromManifest() {
         try {
           const res = await fetch('pages.json', { cache: 'no-cache' });
@@ -89,7 +98,7 @@
           const filtered = arr
             .filter(name => typeof name === 'string' && name.endsWith('.html') && name !== 'index.html');
           // Natural-ish sort
-          filtered.sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
+          filtered.sort(naturalSort);
           return filtered.length ? filtered : fallbackPages;
         } catch (err) {
           console.warn('Could not load pages.json:', err);
@@ -97,19 +106,37 @@
         }
       }
 
-      const pages = await loadPagesFromManifest();
+      function populateSelect(pagesToShow, preserveSelection = true) {
+        const current = preserveSelection ? selectEl.value : null;
+        while (selectEl.firstChild) selectEl.removeChild(selectEl.firstChild);
+        for (const name of pagesToShow) {
+          const opt = document.createElement('option');
+          opt.value = name;
+          opt.textContent = name;
+          selectEl.appendChild(opt);
+        }
+        if (preserveSelection && current && pagesToShow.includes(current)) {
+          selectEl.value = current;
+        }
+      }
 
-      // Populate selector
-      for (const name of pages) {
-        const opt = document.createElement('option');
-        opt.value = name;
-        opt.textContent = name;
-        selectEl.appendChild(opt);
+      function getFilteredPages() {
+        const q = (filterEl?.value || '').trim().toLowerCase();
+        if (!q) return allPages.slice();
+        return allPages.filter(n => n.toLowerCase().includes(q));
       }
 
       function setPage(page) {
         if (!page) return;
-        if (!pages.includes(page)) return;
+        if (!allPages.includes(page)) {
+          if (typeof page === 'string' && page.endsWith('.html') && page !== 'index.html') {
+            allPages.push(page);
+            allPages.sort(naturalSort);
+            populateSelect(getFilteredPages(), true);
+          } else {
+            return;
+          }
+        }
         selectEl.value = page;
         iframeEl.src = page;
         const url = new URL(window.location.href);
@@ -121,10 +148,47 @@
         setPage(e.target.value);
       });
 
+      if (filterEl) {
+        filterEl.addEventListener('input', function () {
+          populateSelect(getFilteredPages(), true);
+        });
+      }
+
+      async function refreshList() {
+        const current = selectEl.value;
+        allPages = await loadPagesFromManifest();
+        const params = new URLSearchParams(window.location.search);
+        const paramPage = params.get('page');
+        if (paramPage && paramPage.endsWith('.html') && paramPage !== 'index.html' && !allPages.includes(paramPage)) {
+          allPages.push(paramPage);
+          allPages.sort(naturalSort);
+        }
+        populateSelect(getFilteredPages(), true);
+        if (noteEl && allPages.length) {
+          noteEl.textContent = 'Tip: share links like ?page=' + allPages[0];
+        }
+        if (current && allPages.includes(current)) {
+          selectEl.value = current;
+        }
+      }
+
+      if (refreshBtn) {
+        refreshBtn.addEventListener('click', function () {
+          refreshList();
+        });
+      }
+
+      // Initial load
+      allPages = await loadPagesFromManifest();
       const params = new URLSearchParams(window.location.search);
       const initial = params.get('page');
-      const first = pages[0];
-      setPage(initial && pages.includes(initial) ? initial : first);
+      if (initial && initial.endsWith('.html') && initial !== 'index.html' && !allPages.includes(initial)) {
+        allPages.push(initial);
+        allPages.sort(naturalSort);
+      }
+      populateSelect(getFilteredPages(), false);
+      const first = allPages[0];
+      setPage(initial && allPages.includes(initial) ? initial : first);
       if (noteEl && first) {
         noteEl.textContent = 'Tip: share links like ?page=' + first;
       }

@@ -47,7 +47,7 @@ class MatrixSorter:
             raise ValueError(f"Method '{method}' not recognized. "
                            f"Available methods: {self.available_methods}")
     
-    def     sort(self, W):
+    def sort(self, W):
         """
         Sort the matrix W using the selected method.
         
