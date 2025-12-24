@@ -1,3 +1,6 @@
+'''
+python3 -m http.server 8000 --directory /home/pajucg/2D/docs
+'''
 import json
 from pathlib import Path
 
